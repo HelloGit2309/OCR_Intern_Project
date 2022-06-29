@@ -87,11 +87,11 @@ class ImageFragment : Fragment() {
         var bitmap = MediaStore.Images.Media.getBitmap(this.requireContext().contentResolver, imageUri) as Bitmap
         val frag = getCallerFragment().toString()
         Log.d("FRAG VAL",frag)
-        if(frag == "camFrag")
-            isCamScanned = true
-        if(isCamScanned)
-            bitmap = changeBitmapContrastBrightness(bitmap,0.9f,60f)
-        bitmap = imageProcessing(bitmap)
+        if(frag == "camFrag") {
+            viewModel.isCamScanned = true
+            bitmap = viewModel.changeBitmapContrastBrightness(bitmap,0.9f,60f)
+        }
+        bitmap = viewModel.imageProcessing(bitmap)
         binding.myImg.setImageBitmap(bitmap)
         binding.okButton.setOnClickListener{
             Toast.makeText(activity,"ML Model Loading",Toast.LENGTH_LONG).show()
@@ -119,34 +119,6 @@ class ImageFragment : Fragment() {
      * contrast 0..10 1 is default
      * brightness -255..255 0 is default
      */
-    fun changeBitmapContrastBrightness(bmp: Bitmap, contrast: Float, brightness: Float): Bitmap {
-        val cm = ColorMatrix(
-            floatArrayOf(contrast,0f,0f,0f,brightness,0f,contrast,0f,0f,brightness,0f,0f,contrast,
-                0f,brightness,0f,0f,0f,1f,0f))
-        val ret = Bitmap.createBitmap(bmp.width, bmp.height, bmp.config)
-        val canvas = Canvas(ret)
-        val paint = Paint()
-        paint.setColorFilter(ColorMatrixColorFilter(cm))
-        canvas.drawBitmap(bmp, 0f, 0f, paint)
-        return ret
-    }
 
-    private fun imageProcessing(bitmap: Bitmap):Bitmap{
-        var mat = Mat()
-        Utils.bitmapToMat(bitmap,mat)
-        Imgproc.cvtColor(mat,mat,COLOR_BGR2GRAY)
-        if(isCamScanned){
-
-            Imgproc.adaptiveThreshold(
-                mat, mat, 255.0, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
-                Imgproc.THRESH_BINARY, 21, 12.0
-            )
-//            threshold(mat,mat,0.0,255.0,Imgproc.THRESH_OTSU)
-        }
-        else
-            Imgproc.threshold(mat, mat, 0.0, 255.0, Imgproc.THRESH_OTSU)
-        Utils.matToBitmap(mat,bitmap)
-        return bitmap
-    }
 
 }

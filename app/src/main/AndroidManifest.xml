@@ -17,9 +17,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.OCRProject"
         tools:targetApi="31">
-        <meta-data
-            android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="ocr" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
