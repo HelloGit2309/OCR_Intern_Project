@@ -115,10 +115,6 @@ class ImageFragment : Fragment() {
         return fragmentManager!!.getBackStackEntryAt(count - 1).getName()
     }
 
-    /**
-     * contrast 0..10 1 is default
-     * brightness -255..255 0 is default
-     */
 
 
 }

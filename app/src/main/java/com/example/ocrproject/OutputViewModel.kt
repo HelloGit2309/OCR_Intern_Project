@@ -77,6 +77,7 @@ class OutputViewModel : ViewModel() {
         return processText()
     }
     private fun processText():String{
+        Log.i("Doc Type: ",docType)
         when(docType){
             "ICICI"-> {
                 val ob = ICICI(stringToLine,lineToString)
@@ -85,6 +86,11 @@ class OutputViewModel : ViewModel() {
             }
             "RELIANCE"->{
                 val ob = Reliance(stringToLine)
+                ob.lineMatching()
+                hashmap = ob.hashmap
+            }
+            "Bajaj"->{
+                val ob = Bajaj(stringToLine)
                 ob.lineMatching()
                 hashmap = ob.hashmap
             }
@@ -108,7 +114,8 @@ class OutputViewModel : ViewModel() {
         var begin = System.currentTimeMillis()
         tessBaseAPI.init(dataPath, "eng")
         tessBaseAPI.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST,"-%*&#!@/,.:' \"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
-        tessBaseAPI.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO_OSD)
+//        tessBaseAPI.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO_OSD)
+//        tessBaseAPI.words.getBox()
         tessBaseAPI.setImage(bitmap)
         var retStr: String? = "No result"
         try {

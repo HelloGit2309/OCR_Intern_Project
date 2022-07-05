@@ -112,7 +112,17 @@ class ICICI(stoL: HashMap<String,Int>, ltoS: HashMap<Int,String>){
                 hashmap["Previous Policy No"] = wd
             }
             "Registration No. Make Model Type of Body CC/KW Mfg Yr Seating Capacity Chassis No. Engine No."->{
-
+                var i = n-1
+                var wd = ""
+                while(i >= 0 && !ans[i].equals(' '))
+                    wd += ans[i--]
+                wd = wd.reversed()
+                hashmap["Engine No"] = wd
+                --i
+                wd = ""
+                while(i >= 0 && !ans[i].equals(' '))
+                    wd += ans[i--]
+                hashmap["Chassis No"] = wd
             }
             else->{
                 Log.d("Error", "Unable to Process line: $l")

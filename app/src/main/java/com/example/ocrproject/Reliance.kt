@@ -14,6 +14,7 @@ class Reliance(stoL: HashMap<String,Int>) {
         keyWords.add(Pair("Email-ID","GSTIN/UIN & Place of Supply"))
         keyWords.add(Pair("Registration No","Mfg. Month & Year"))
         keyWords.add(Pair("Make / Model & Variant","CC / HP / Watt"))
+        keyWords.add(Pair("Engine No./Chassis No.","Seating Capacity Including"))
     }
 
     // LCS function to calculate matching percentage
@@ -127,6 +128,9 @@ class Reliance(stoL: HashMap<String,Int>) {
             }
             "Make / Model & Variant"->{
                 hashmap["Vehicle Model"] = out.first
+            }
+            "Engine No./Chassis No." ->{
+                hashmap["Engine No / Chassis No"] = out.first
             }
             else->{
                 Log.e("Error: ","Cannot interpret the key")
