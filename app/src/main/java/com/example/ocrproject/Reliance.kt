@@ -1,5 +1,6 @@
 package com.example.ocrproject
 
+import android.provider.SimPhonebookContract
 import android.util.Log
 
 class Reliance(stoL: HashMap<String,Int>) {
@@ -38,20 +39,23 @@ class Reliance(stoL: HashMap<String,Int>) {
         }
         return dp[n][m].toDouble()/d
     }
+    private fun isUnrequiredChar(s: Char):Boolean{
+        if(s == ' ' || s == '\'' || s == '\"' || s == '.' || s == ':' || s == ',' || s == ';')
+        return true
+        return false
+    }
+
     private fun myTrim(str:String):String{
-        var n = str.length
-        var s = str
-        if(n == 0)
-            return str
-        if(s[0] == '.' || s[0] == ':' || s[0] == ',' || s[0] == ';')
-            s = s.substring(1)
-        n = s.length
-        if(n == 0)
-            return s
-        if(s[n-1] == '.' || s[n-1] == ':' || s[n-1] == ',' || s[n-1] == ';')
-            s = s.substring(0,n-1)
-        s.trim(' ')
-        return s
+        val n = str.length
+        var start = 0
+        var end = n-1
+        while(start < n && isUnrequiredChar(str[start]))
+            ++start
+        while(end >= 0 && isUnrequiredChar(str[end]))
+            --end
+        if(start > end)
+            return ""
+       return str.substring(start,end+1)
     }
 
     private fun detectPair(pair:Pair<String,String>,line: String):Pair<String,String>{

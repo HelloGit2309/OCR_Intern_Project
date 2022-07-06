@@ -131,10 +131,10 @@ class ICICI(stoL: HashMap<String,Int>, ltoS: HashMap<Int,String>){
     }
     fun lineMatching(){
         for(line in lines){
-            var bm = 0.0
-            var l = ""
+            var bm = 0.0 // best matching bm
+            var l = ""   // l = best matching line
             for(key in stringToLine.keys){
-                var cm = LCS(line,key)
+                var cm = LCS(line,key)  // current matching cm
                 if(cm > 0.5 && cm > bm){
                     bm = cm
                     l = key

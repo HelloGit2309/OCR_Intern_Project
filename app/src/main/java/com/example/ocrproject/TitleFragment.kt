@@ -70,28 +70,9 @@ class TitleFragment : Fragment() {
 
         viewModel.scan.observe(viewLifecycleOwner, Observer{myScan ->
             if(myScan)
-            {
-                val docType = binding.autoCompleteTextView.text.toString()
-                if(docType == "Select Document Type")
-                {
-                    viewModel.onAfterScanPress()
-                    Toast.makeText(activity,"Select Document Type",Toast.LENGTH_SHORT).show()
-                }
-                else{
-                    viewModel.onAfterScanPress()
-                    val cameraFragment:Fragment = CameraFragment.newInstance()
-                    val bundle = Bundle()
-                    bundle.putString("docType",docType)
-                    cameraFragment.setArguments(bundle)
-                    activity?.let {
-                        it.supportFragmentManager.beginTransaction()
-                            .replace(R.id.myContainer, cameraFragment)
-                            .addToBackStack("titleFrag")
-                            .commit()
-                    }
-                }
-            }
+                changeToCamFrag()
         })
+
         viewModel.upload.observe(viewLifecycleOwner,Observer{myUpload ->
             if(myUpload)
             {
@@ -111,6 +92,30 @@ class TitleFragment : Fragment() {
 
         return binding.root
     }
+
+    private fun changeToCamFrag(){
+        val docType = binding.autoCompleteTextView.text.toString()
+        if(docType == "Select Document Type")
+        {
+            viewModel.onAfterScanPress()
+            Toast.makeText(activity,"Select Document Type",Toast.LENGTH_SHORT).show()
+        }
+        else{
+            viewModel.onAfterScanPress()
+            val cameraFragment:Fragment = CameraFragment.newInstance()
+            val bundle = Bundle()
+            bundle.putString("docType",docType)
+            cameraFragment.arguments = bundle
+            activity?.let {
+                it.supportFragmentManager.beginTransaction()
+                    .replace(R.id.myContainer, cameraFragment)
+                    .addToBackStack("titleFrag")
+                    .commit()
+            }
+        }
+    }
+
+
     fun AutoCompleteTextView.showDropdown(adapter: ArrayAdapter<String>?) {
         if(!TextUtils.isEmpty(this.text.toString())){
             adapter?.filter?.filter(null)
@@ -146,7 +151,10 @@ class TitleFragment : Fragment() {
         } else {
             //If scheme is a File
             //This will replace white spaces with %20 and also other special characters. This will avoid returning null values on file name with spaces and special characters.
-            MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(uri.getPath())).toString())
+            uri.path?.let {
+                MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(it)).toString())
+            }
+
         }
         return extension
     }
@@ -162,7 +170,7 @@ class TitleFragment : Fragment() {
             if(fileExt != "jpg" && fileExt != "jpeg" && fileExt != "png" && fileExt != "pdf")
             {
                 Toast.makeText(activity,"File Not Image",Toast.LENGTH_SHORT).show()
-                fragmentManager!!.popBackStack()
+                fragmentManager?.popBackStack()
                 return
             }
             val imageFrag:Fragment = ImageFragment.newInstance()

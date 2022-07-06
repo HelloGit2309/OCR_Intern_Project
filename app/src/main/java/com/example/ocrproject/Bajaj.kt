@@ -36,21 +36,23 @@ class Bajaj(stoL: HashMap<String,Int>) {
         }
         return dp[n][m].toDouble()/d
     }
+    private fun isUnrequiredChar(s: Char):Boolean{
+        if(s == ' ' || s == '\'' || s == '\"' || s == '.' || s == ':' || s == ',' || s == ';')
+            return true
+        return false
+    }
+
     private fun myTrim(str:String):String{
-        var s = str
-        s.trim(' ')
-        var n = s.length
-        if(n == 0)
-            return s
-        if(s[0] == ' ' || s[0] == '.' || s[0] == ':' || s[0] == ',' || s[0] == ';' || s[0] == '\"' || s[0] == '\'')
-            s = s.substring(1)
-        n = s.length
-        if(n == 0)
-            return s
-        if(s[n-1] == ' ' || s[n-1] == '.' || s[n-1] == ':' || s[n-1] == ',' || s[n-1] == ';' || s[0] == '\"' || s[0] == '\'')
-            s = s.substring(0,n-1)
-        s.trim(' ')
-        return s
+        val n = str.length
+        var start = 0
+        var end = n-1
+        while(start < n && isUnrequiredChar(str[start]))
+            ++start
+        while(end >= 0 && isUnrequiredChar(str[end]))
+            --end
+        if(start > end)
+            return ""
+        return str.substring(start,end+1)
     }
 
     private fun processLines(l: String, key: String):Pair<String,Double>{

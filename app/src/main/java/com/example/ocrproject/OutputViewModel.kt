@@ -51,10 +51,9 @@ class OutputViewModel : ViewModel() {
     fun startModel(){
         viewModelScope.launch(Dispatchers.Default) {
             txt = getText()
-//            _outputText.value = txt
             val ans = extractInfo()
             withContext(Dispatchers.Main) {
-                _outputText.value = ans
+              _outputText.value = ans
             }
 
         }
@@ -76,6 +75,7 @@ class OutputViewModel : ViewModel() {
         }
         return processText()
     }
+
     private fun processText():String{
         Log.i("Doc Type: ",docType)
         when(docType){
@@ -105,7 +105,7 @@ class OutputViewModel : ViewModel() {
        return wd
     }
 
-    private fun getText(): String {
+    private fun getText(): String{
         try {
             tessBaseAPI = TessBaseAPI()
         } catch (e: Exception) {
@@ -126,8 +126,13 @@ class OutputViewModel : ViewModel() {
         var end = System.currentTimeMillis()
         println("Time Taken: ${end-begin}")
         tessBaseAPI.recycle()
-        retStr ?: return "No Result"
-        return retStr!!
+        retStr ?: return "No result"
+        return retStr
     }
+
+
+
+
+
 
 }

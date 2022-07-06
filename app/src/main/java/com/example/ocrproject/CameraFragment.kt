@@ -38,9 +38,7 @@ import kotlin.concurrent.thread
 
 class CameraFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = CameraFragment()
-    }
+
     private lateinit var safeContext: Context
     private var imageCapture: ImageCapture? = null
     private lateinit var binding: FragmentCameraBinding
@@ -115,8 +113,7 @@ class CameraFragment : Fragment() {
                     Log.e("CameraXApp", "Photo capture failed: ${exc.message}", exc)
                 }
 
-                override fun
-                        onImageSaved(output: ImageCapture.OutputFileResults){
+                override fun onImageSaved(output: ImageCapture.OutputFileResults){
                     val msg = "Photo capture succeeded: ${output.savedUri}"
                     Toast.makeText(activity, msg, Toast.LENGTH_LONG).show()
                     // adding Image URI as Bundle
@@ -166,32 +163,7 @@ class CameraFragment : Fragment() {
 
                 binding.viewFinder.afterMeasured {
                     binding.viewFinder.setOnTouchListener { _, event ->
-                        return@setOnTouchListener when (event.action) {
-                            MotionEvent.ACTION_DOWN -> {
-                                true
-                            }
-                            MotionEvent.ACTION_UP -> {
-                                val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-                                    binding.viewFinder.width.toFloat(), binding.viewFinder.height.toFloat()
-                                )
-                                val autoFocusPoint = factory.createPoint(event.x, event.y)
-                                try {
-                                    camera.cameraControl.startFocusAndMetering(
-                                        FocusMeteringAction.Builder(
-                                            autoFocusPoint,
-                                            FocusMeteringAction.FLAG_AF
-                                        ).apply {
-                                            //focus only when the user tap the preview
-                                            disableAutoCancel()
-                                        }.build()
-                                    )
-                                } catch (e: CameraInfoUnavailableException) {
-                                    Log.d("ERROR", "cannot access camera", e)
-                                }
-                                true
-                            }
-                            else -> false // Unhandled event.
-                        }
+                        return@setOnTouchListener autoFocus(event,camera)
                     }
                 }
 
@@ -200,6 +172,35 @@ class CameraFragment : Fragment() {
             }
 
         }, ContextCompat.getMainExecutor(safeContext))
+    }
+
+    private fun autoFocus(event: MotionEvent, camera: Camera):Boolean{
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                return true
+            }
+            MotionEvent.ACTION_UP -> {
+                val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+                    binding.viewFinder.width.toFloat(), binding.viewFinder.height.toFloat()
+                )
+                val autoFocusPoint = factory.createPoint(event.x, event.y)
+                try {
+                    camera.cameraControl.startFocusAndMetering(
+                        FocusMeteringAction.Builder(
+                            autoFocusPoint,
+                            FocusMeteringAction.FLAG_AF
+                        ).apply {
+                            //focus only when the user tap the preview
+                            disableAutoCancel()
+                        }.build()
+                    )
+                } catch (e: CameraInfoUnavailableException) {
+                    Log.d("ERROR", "cannot access camera", e)
+                }
+                return true
+            }
+            else -> return false // Unhandled event.
+        }
     }
 
     inline fun View.afterMeasured(crossinline block: () -> Unit) {
@@ -215,6 +216,10 @@ class CameraFragment : Fragment() {
                 }
             })
         }
+    }
+
+    companion object {
+        fun newInstance() = CameraFragment()
     }
 
 }
