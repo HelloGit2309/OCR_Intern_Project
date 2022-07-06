@@ -62,16 +62,16 @@ class OutputViewModel : ViewModel() {
     private fun extractInfo():String{
         val n = txt.length
         var wd = ""
-        var i = 0
-        var j = 1
-        while(i < n){
-            while(i < n && !txt[i].equals('\n'))
-                wd += txt[i++]
+        var index = 0
+        var lineNumber = 1
+        while(index < n){
+            while(index < n && !txt[index].equals('\n'))
+                wd += txt[index++]
 //            println(j.toString()+": "+wd+"\n")
-            stringToLine[wd] = j
-            lineToString[j] = wd
+            stringToLine[wd] = lineNumber
+            lineToString[lineNumber] = wd
             wd = ""
-            ++i; ++j
+            ++index; ++lineNumber
         }
         return processText()
     }
