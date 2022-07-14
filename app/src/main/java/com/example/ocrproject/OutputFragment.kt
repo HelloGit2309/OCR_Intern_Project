@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.ocrproject.databinding.FragmentOutputBinding
+import com.google.android.material.textfield.TextInputLayout
 import com.googlecode.tesseract.android.TessBaseAPI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -59,14 +60,23 @@ class OutputFragment : Fragment() {
         viewModel.docType = arguments?.getString("docType") as String
 
             prepareTessData()
-            viewModel.startModel()
+            viewModel.startModel(activity)
 
 
         viewModel.outputText.observe(viewLifecycleOwner,Observer{
             output->
-            binding.textView.setText(output)
+            renderTextFields(output)
         })
 
+    }
+    private fun renderTextFields(hashmap: HashMap<String,String>){
+        hashmap.forEach{
+            val textView = layoutInflater.inflate(R.layout.edit_text,null) as TextInputLayout
+            textView.hint = it.key
+            textView.editText?.setText(it.value)
+            binding.layoutId.addView(textView)
+
+        }
     }
 
     private fun prepareTessData() {

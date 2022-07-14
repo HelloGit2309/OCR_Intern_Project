@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable name="title" type="java.lang.String" />
+        <variable name="subTitle" type="java.lang.String" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/curve_dialog_shape"
+        android:paddingTop="16dp"
+        android:paddingBottom="32dp"
+        android:paddingHorizontal="20dp"
+        android:orientation="vertical">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/indefinite_loader"
+            android:layout_width="120dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center_horizontal"
+            app:lottie_autoPlay="true"
+            app:lottie_renderMode="software"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/confirmation_main_loader" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/black"
+            android:text="Processing Image"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/tv_subTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/black"
+            android:text="Extracting Your Info..."
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+</layout>

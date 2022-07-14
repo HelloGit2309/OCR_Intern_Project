@@ -1,5 +1,6 @@
 package com.example.ocrproject
 
+import android.app.Activity
 import android.content.ContentValues
 import android.graphics.Bitmap
 import android.os.Environment
@@ -11,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.googlecode.tesseract.android.TessBaseAPI
 import com.googlecode.tesseract.android.TessBaseAPI.OEM_TESSERACT_LSTM_COMBINED
 import com.googlecode.tesseract.android.TessBaseAPI.OEM_TESSERACT_ONLY
+import dialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,9 +30,8 @@ class OutputViewModel : ViewModel() {
     lateinit var bitmap: Bitmap
     lateinit var docType:String
     private var txt:String = ""
-    private val _outputText = MutableLiveData<String>()
-    val outputText: LiveData<String>
-        get() = _outputText
+    val outputText = MutableLiveData<HashMap<String,String>>()
+//    val outputText: LiveData<MutableLiveData<HashMap<String,String>>> = _outputText
     var hashmap = HashMap<String,String>()
     val stringToLine = HashMap<String,Int>()
     val lineToString = HashMap<Int,String>()
@@ -48,18 +49,24 @@ class OutputViewModel : ViewModel() {
         hashmap["E-Policy No"] = ""
         hashmap["Covernote No"] = ""
     }
-    fun startModel(){
+    fun startModel(activity: Activity?){
+
+        val ob = dialog(activity)
+        ob.startLoadingdialog()
         viewModelScope.launch(Dispatchers.Default) {
+
             txt = getText()
-            val ans = extractInfo()
+            extractInfo()
+
             withContext(Dispatchers.Main) {
-              _outputText.value = ans
+                ob.dismissdialog()
+              outputText.value = hashmap
             }
 
         }
     }
 
-    private fun extractInfo():String{
+    private fun extractInfo(){
         val n = txt.length
         var wd = ""
         var index = 0
@@ -73,10 +80,10 @@ class OutputViewModel : ViewModel() {
             wd = ""
             ++index; ++lineNumber
         }
-        return processText()
+        processText()
     }
 
-    private fun processText():String{
+    private fun processText(){
         Log.i("Doc Type: ",docType)
         when(docType){
             "ICICI"-> {
@@ -95,15 +102,8 @@ class OutputViewModel : ViewModel() {
                 hashmap = ob.hashmap
             }
         }
-        return printData()
     }
 
-    private fun printData():String{
-        var wd = ""
-        for(keys in hashmap.keys)
-            wd += keys+": "+hashmap[keys]+"\n"
-       return wd
-    }
 
     private fun getText(): String{
         try {
