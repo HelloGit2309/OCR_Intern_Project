@@ -22,8 +22,8 @@ class Reliance(stoL: HashMap<String,Int>) {
     private fun LCS(a:String, b:String):Double{
         var x = a
         var y = b
-        x.toUpperCase()
-        y.toUpperCase()
+        x.uppercase()
+        y.uppercase()
         x.trim(' ')
         y.trim(' ')
         var n = x.length

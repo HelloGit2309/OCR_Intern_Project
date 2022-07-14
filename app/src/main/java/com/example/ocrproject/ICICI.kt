@@ -9,9 +9,18 @@ class ICICI(stoL: HashMap<String,Int>, ltoS: HashMap<Int,String>){
     private val stringToLine:HashMap<String,Int>
     private val lineToString:HashMap<Int,String>
     private val lines = ArrayList<String>()
+    private val vehicleMake = ArrayList<String>()
+    private val bodyType = ArrayList<String>()
     init {
         stringToLine = stoL
         lineToString = ltoS
+        vehicleMake.add("CHEVROLET")
+        vehicleMake.add("TATA")
+        vehicleMake.add("MARUTI SUZUKI")
+        bodyType.add("Saloon")
+        bodyType.add("Sedan")
+        bodyType.add("Hatchback")
+        bodyType.add("Convertible")
         lines.add("Name Telephone no Mobile no Email")
         lines.add("Address Policy No E-Policy No")
         lines.add("Policy Issued On Covernote No")
@@ -24,8 +33,8 @@ class ICICI(stoL: HashMap<String,Int>, ltoS: HashMap<Int,String>){
     private fun LCS(a:String, b:String):Double{
         var x = a
         var y = b
-        x.toUpperCase()
-        y.toUpperCase()
+        x.uppercase()
+        y.uppercase()
         x.trim(' ')
         y.trim(' ')
         var n = x.length
@@ -123,18 +132,86 @@ class ICICI(stoL: HashMap<String,Int>, ltoS: HashMap<Int,String>){
                 while(i >= 0 && !ans[i].equals(' '))
                     wd += ans[i--]
                 hashmap["Chassis No"] = wd
+                extract_Make_Model_and_BodyType(ans)
             }
             else->{
                 Log.d("Error", "Unable to Process line: $l")
             }
         }
     }
+
+    private fun extract_Make_Model_and_BodyType(line: String) {
+
+        val words = line.split(' ').toTypedArray()
+        val n = words.size
+        var i = 1
+        var j = n-6  // 6th word from the right
+        if(i > j)
+            return
+        var bmp = 0.0 // best matching percentage
+        var Make = ""
+        var makeSize = 0
+        for(make in vehicleMake)
+        {
+            val sz = make.split(' ').toTypedArray().size // number of words in make
+            if(sz == 1)
+            {
+                val myWord = words[i]
+                val mp = LCS(make,myWord)
+                if(mp > bmp && mp > 0.5)
+                {
+                    bmp = mp
+                    Make = myWord
+                    makeSize = 1
+                }
+            }
+            else if(sz == 2 && i+1 < n)
+            {
+                val myWord = words[i]+" "+words[i+1]
+                val mp = LCS(make,myWord)
+                if(mp > bmp && mp > 0.5)
+                {
+                    bmp = mp
+                    Make = myWord
+                    makeSize = 2
+                }
+            }
+        }
+        if(makeSize == 2)
+            i += 2
+        else
+            ++i
+
+        bmp = 0.0
+        var body = ""
+        for(BodyType in bodyType)
+        {
+            val mp = LCS(BodyType, words[j]) // matching percentage
+            if(mp > bmp && mp > 0.5)
+            {
+                bmp = mp
+                body = words[j]
+            }
+        }
+        hashmap["Type of Body"] = body
+        --j
+        if(Make != "")
+        {
+            hashmap["Make"] = Make
+            var model = " "
+            for(k in i..j)
+                model += words[k]+" "
+            model.trim(' ')
+            hashmap["Model"] = model
+        }
+    }
+
     fun lineMatching(){
         for(line in lines){
             var bm = 0.0 // best matching bm
             var l = ""   // l = best matching line
             for(key in stringToLine.keys){
-                var cm = LCS(line,key)  // current matching cm
+                val cm = LCS(line,key)  // current matching cm
                 if(cm > 0.5 && cm > bm){
                     bm = cm
                     l = key

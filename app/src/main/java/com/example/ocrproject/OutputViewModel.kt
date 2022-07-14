@@ -67,7 +67,7 @@ class OutputViewModel : ViewModel() {
         while(index < n){
             while(index < n && !txt[index].equals('\n'))
                 wd += txt[index++]
-//            println(j.toString()+": "+wd+"\n")
+//            println(lineNumber.toString()+": "+wd+"\n")
             stringToLine[wd] = lineNumber
             lineToString[lineNumber] = wd
             wd = ""
