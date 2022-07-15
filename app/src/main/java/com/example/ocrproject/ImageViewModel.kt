@@ -28,7 +28,7 @@ class ImageViewModel : ViewModel() {
         if(isCamScanned){
 
             Imgproc.adaptiveThreshold(
-                mat, mat, 255.0, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+                mat, mat, 255.0, Imgproc.ADAPTIVE_THRESH_MEAN_C,
                 Imgproc.THRESH_BINARY, 21, 12.0
             )
 //            threshold(mat,mat,0.0,255.0,Imgproc.THRESH_OTSU)

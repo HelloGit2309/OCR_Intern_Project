@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:textColor="@color/black"
-            android:text="Processing Image"
+            android:text="Loading Image"
             android:layout_marginTop="16dp"/>
 
         <TextView

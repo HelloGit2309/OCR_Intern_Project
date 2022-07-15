@@ -94,7 +94,6 @@ class ImageFragment : Fragment() {
         bitmap = viewModel.imageProcessing(bitmap)
         binding.myImg.setImageBitmap(bitmap)
         binding.okButton.setOnClickListener{
-            Toast.makeText(activity,"ML Model Loading",Toast.LENGTH_LONG).show()
             val outputFrag:Fragment = OutputFragment.newInstance()
             val bundle = Bundle()
             bundle.putParcelable("imageBitmap",bitmap)
