@@ -1,26 +1,24 @@
 package com.example.ocrproject
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.ocrproject.databinding.FragmentOutputBinding
-import com.googlecode.tesseract.android.TessBaseAPI
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.io.*
+import com.google.android.material.textfield.TextInputLayout
+import dialog
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 
 class OutputFragment : Fragment() {
@@ -30,12 +28,10 @@ class OutputFragment : Fragment() {
     }
 
     private lateinit var viewModel: OutputViewModel
-    private lateinit var binding:FragmentOutputBinding
+    private lateinit var binding: FragmentOutputBinding
     private lateinit var safeContext: Context
-//    private lateinit var im:InputImage
-//    private lateinit var image:InputImage
 
-    val TESS_DATA:String = "/tessdata"
+    val TESS_DATA: String = "/tessdata"
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -46,7 +42,9 @@ class OutputFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(inflater,R.layout.fragment_output, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_output, container, false)
+
+
         return binding.root
     }
 
@@ -54,19 +52,29 @@ class OutputFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this).get(OutputViewModel::class.java)
         val bitmap = arguments?.getParcelable("imageBitmap") as Bitmap?
-        viewModel.dataPath = activity?.let{ it.getExternalFilesDir("/")?.getPath().toString()} + "/"
+        viewModel.dataPath =
+            activity?.let { it.getExternalFilesDir("/")?.getPath().toString() } + "/"
         viewModel.bitmap = bitmap as Bitmap
         viewModel.docType = arguments?.getString("docType") as String
 
-            prepareTessData()
-            viewModel.startModel()
+        prepareTessData()
+        val ob = dialog(activity)
+        viewModel.startModel(ob)
 
-
-        viewModel.outputText.observe(viewLifecycleOwner,Observer{
-            output->
-            binding.textView.setText(output)
+        viewModel.outputText.observe(viewLifecycleOwner, Observer { output ->
+            renderTextFields(output)
         })
 
+    }
+
+    private fun renderTextFields(hashmap: HashMap<String, String>) {
+        hashmap.forEach {
+            val textView = layoutInflater.inflate(R.layout.edit_text, null) as TextInputLayout
+            textView.hint = it.key
+            textView.editText?.setText(it.value)
+            binding.layoutId.addView(textView)
+
+        }
     }
 
     private fun prepareTessData() {
@@ -82,19 +90,19 @@ class OutputFragment : Fragment() {
                 }
             }
             val fileName = "eng.traineddata"
-                val pathToDataFile = "$dir/$fileName"
-                if (!File(pathToDataFile).exists()) {
-                    val `in`: InputStream = activity?.getAssets()?.open(fileName) as InputStream
-                    val out: OutputStream = FileOutputStream(pathToDataFile)
-                    `in`.copyTo(out)
-                    `in`.close()
-                    out.close()
-                }
+            val pathToDataFile = "$dir/$fileName"
+            if (!File(pathToDataFile).exists()) {
+                val `in`: InputStream = activity?.getAssets()?.open(fileName) as InputStream
+                val out: OutputStream = FileOutputStream(pathToDataFile)
+                `in`.copyTo(out)
+                `in`.close()
+                out.close()
+            }
 
         } catch (e: java.lang.Exception) {
-            Log.e(TAG, e.message!!)
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()

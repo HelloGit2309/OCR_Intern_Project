@@ -5,6 +5,7 @@
     <string-array name="Document_Type">
         <item>ICICI</item>
         <item>RELIANCE</item>
+        <item>Bajaj</item>
     </string-array>
     <string name="docType">Document Type</string>
 </resources>

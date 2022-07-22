@@ -2,102 +2,82 @@ package com.example.ocrproject
 
 import android.content.ContentValues
 import android.graphics.Bitmap
-import android.os.Environment
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.googlecode.tesseract.android.TessBaseAPI
-import com.googlecode.tesseract.android.TessBaseAPI.OEM_TESSERACT_LSTM_COMBINED
-import com.googlecode.tesseract.android.TessBaseAPI.OEM_TESSERACT_ONLY
+import dialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-//import com.google.android.gms.tasks.Task
-//import com.google.mlkit.vision.common.InputImage
-//import com.google.mlkit.vision.text.Text
-//import com.google.mlkit.vision.text.TextRecognition
-//import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import java.lang.Exception
 
 class OutputViewModel : ViewModel() {
     // TODO: Implement the ViewModel
-    private lateinit var tessBaseAPI:TessBaseAPI
-    lateinit var dataPath:String
+    private lateinit var tessBaseAPI: TessBaseAPI
+    lateinit var dataPath: String
     lateinit var bitmap: Bitmap
-    lateinit var docType:String
-    private var txt:String = ""
-    private val _outputText = MutableLiveData<String>()
-    val outputText: LiveData<String>
-        get() = _outputText
-    var hashmap = HashMap<String,String>()
-    val stringToLine = HashMap<String,Int>()
-    val lineToString = HashMap<Int,String>()
+    lateinit var docType: String
+    private var txt: String = ""
+    var outputText = MutableLiveData<HashMap<String, String>>()
+        private set
 
+    var hashmap = HashMap<String, String>()
+    val stringToLine = HashMap<String, Int>()
+    val lineToString = HashMap<Int, String>()
 
-    init {
-        hashmap["Name"] = ""
-        hashmap["Email"] = ""
-        hashmap["Telephone No"] = ""
-        hashmap["Mobile No"] = ""
-        hashmap["Policy No"] = ""
-        hashmap["Previous Policy No"] = ""
-        hashmap["Vehicle Registration No"] = ""
-        hashmap["Vehicle Registation Date"] = ""
-        hashmap["E-Policy No"] = ""
-        hashmap["Covernote No"] = ""
-    }
-    fun startModel(){
+    fun startModel(ob: dialog) {
+
+        ob.startLoadingdialog()
         viewModelScope.launch(Dispatchers.Default) {
+
             txt = getText()
-//            _outputText.value = txt
-            val ans = extractInfo()
+            extractInfo()
+
             withContext(Dispatchers.Main) {
-                _outputText.value = ans
+                ob.dismissdialog()
+                outputText.value = hashmap
             }
 
         }
     }
 
-    private fun extractInfo():String{
+    private fun extractInfo() {
         val n = txt.length
         var wd = ""
-        var i = 0
-        var j = 1
-        while(i < n){
-            while(i < n && !txt[i].equals('\n'))
-                wd += txt[i++]
-//            println(j.toString()+": "+wd+"\n")
-            stringToLine[wd] = j
-            lineToString[j] = wd
+        var index = 0
+        var lineNumber = 1
+        while (index < n) {
+            while (index < n && !txt[index].equals('\n'))
+                wd += txt[index++]
+            stringToLine[wd] = lineNumber
+            lineToString[lineNumber] = wd
             wd = ""
-            ++i; ++j
+            ++index; ++lineNumber
         }
-        return processText()
+        processText()
     }
-    private fun processText():String{
-        when(docType){
-            "ICICI"-> {
-                val ob = ICICI(stringToLine,lineToString)
+
+    private fun processText() {
+        when (docType) {
+            "ICICI" -> {
+                val ob = ICICI(stringToLine, lineToString)
                 ob.lineMatching()
                 hashmap = ob.hashmap
             }
-            "RELIANCE"->{
+            "RELIANCE" -> {
                 val ob = Reliance(stringToLine)
                 ob.lineMatching()
                 hashmap = ob.hashmap
             }
+            "Bajaj" -> {
+                val ob = Bajaj(stringToLine)
+                ob.lineMatching()
+                hashmap = ob.hashmap
+            }
         }
-        return printData()
     }
 
-    private fun printData():String{
-        var wd = ""
-        for(keys in hashmap.keys)
-            wd += keys+": "+hashmap[keys]+"\n"
-       return wd
-    }
 
     private fun getText(): String {
         try {
@@ -105,22 +85,29 @@ class OutputViewModel : ViewModel() {
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, e.message!!)
         }
-        var begin = System.currentTimeMillis()
+        val begin = System.currentTimeMillis()
+        // initialising Tess with training model
         tessBaseAPI.init(dataPath, "eng")
-        tessBaseAPI.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST,"-%*&#!@/,.:' \"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
-        tessBaseAPI.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO_OSD)
+        // setting allowed characters to detect
+        tessBaseAPI.setVariable(
+            TessBaseAPI.VAR_CHAR_WHITELIST,
+            "-%*&#!@/,.:' \"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        )
+        // passing input
         tessBaseAPI.setImage(bitmap)
         var retStr: String? = "No result"
         try {
+            // storing OCR result
             retStr = tessBaseAPI.utF8Text
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, e.message!!)
         }
-        var end = System.currentTimeMillis()
-        println("Time Taken: ${end-begin}")
+        val end = System.currentTimeMillis()
+        println("Time Taken: ${end - begin}")
         tessBaseAPI.recycle()
-        retStr ?: return "No Result"
-        return retStr!!
+        retStr ?: return "No result"
+        return retStr
     }
+
 
 }

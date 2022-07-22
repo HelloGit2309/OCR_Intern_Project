@@ -2,110 +2,76 @@ package com.example.ocrproject
 
 import android.util.Log
 
-class Reliance(stoL: HashMap<String,Int>) {
-    private val stringToLine:HashMap<String,Int>
+class Reliance(private val stringToLine: HashMap<String,Int>) {
     private val keyWords = ArrayList<Pair<String,String>>()
-    val hashmap =  HashMap<String,String>()
+    var hashmap =  HashMap<String,String>()
+        private set
     init {
-        stringToLine = stoL
         keyWords.add(Pair("Insured Name","Period of Insurance"))
         keyWords.add(Pair("Policy Number","Proposal/Covernote No"))
         keyWords.add(Pair("Mobile No","Tax Invoice No. & Date"))
         keyWords.add(Pair("Email-ID","GSTIN/UIN & Place of Supply"))
         keyWords.add(Pair("Registration No","Mfg. Month & Year"))
         keyWords.add(Pair("Make / Model & Variant","CC / HP / Watt"))
+        keyWords.add(Pair("Engine No./Chassis No.","Seating Capacity Including"))
     }
 
-    // LCS function to calculate matching percentage
-    private fun LCS(a:String, b:String):Double{
-        var x = a
-        var y = b
-        x.toUpperCase()
-        y.toUpperCase()
-        x.trim(' ')
-        y.trim(' ')
-        var n = x.length
-        var m = y.length
-        val d = Integer.max(n, m).toDouble()
-        val dp = Array(n+1){IntArray(m+1){0}}
-        for(i in 1..n){
-            for(j in 1..m){
-                if(x[i-1].equals(y[j-1]))
-                    dp[i][j] = 1+dp[i-1][j-1]
-                dp[i][j] = Integer.max(dp[i][j], Integer.max(dp[i - 1][j], dp[i][j - 1]))
-            }
-        }
-        return dp[n][m].toDouble()/d
-    }
-    private fun myTrim(str:String):String{
-        var n = str.length
-        var s = str
-        if(n == 0)
-            return str
-        if(s[0] == '.' || s[0] == ':' || s[0] == ',' || s[0] == ';')
-            s = s.substring(1)
-        n = s.length
-        if(n == 0)
-            return s
-        if(s[n-1] == '.' || s[n-1] == ':' || s[n-1] == ',' || s[n-1] == ';')
-            s = s.substring(0,n-1)
-        s.trim(' ')
-        return s
-    }
 
     private fun detectPair(pair:Pair<String,String>,line: String):Pair<String,String>{
-        var cp = Pair(0.0,0.0)
-        var ca = Pair("","")
+        var currPair = Pair(0.0,0.0)
+        var currAns = Pair("","")
         line.trim(' ')
         var n = line.length
         var i = 0
-        var v = ArrayList<Int>()
+        val posOfSpaces = ArrayList<Int>()
         while(i < n){
             if(line[i].equals(' '))
-                v.add(i)
+                posOfSpaces.add(i)
             ++i
         }
-        n = v.size
+        n = posOfSpaces.size
+        // finding 2 key value pairs in a line
         for(i in 0..n-1){
             for(j in i+1..n-1){
                 for(k in j+1..n-1){
-                    var a = line.substring(0,v[i])
-                    var b = line.substring(v[j]+1,v[k])
-                    a = myTrim(a)
-                    b = myTrim(b)
-                    val op = Pair(LCS(a,pair.first),LCS(b,pair.second))
-                    if(op.first > 0.5 && op.second > 0.5)
+                    var firstKey = line.substring(0,posOfSpaces[i])
+                    var secondKey = line.substring(posOfSpaces[j]+1,posOfSpaces[k])
+                    firstKey = Utils.myTrim(firstKey)
+                    secondKey = Utils.myTrim(secondKey)
+                    val bestMatchPair = Pair(Utils.LCS(firstKey,pair.first),Utils.LCS(secondKey,pair.second))
+                    if(bestMatchPair.first > 0.5 && bestMatchPair.second > 0.5)
                     {
-                        if((cp.first < op.first && cp.second < op.second) || (cp.first == op.first && cp.second < op.second)
-                            || (cp.first < op.first && cp.second == op.second)){
-                            cp = op
-                            var c = line.substring(v[i]+1,v[j])
-                            var d = line.substring(v[k]+1)
-                            c = myTrim(c)
-                            d = myTrim(d)
-                            ca = Pair(c, d)
+                        if((currPair.first < bestMatchPair.first && currPair.second < bestMatchPair.second) || (currPair.first == bestMatchPair.first && currPair.second < bestMatchPair.second)
+                            || (currPair.first < bestMatchPair.first && currPair.second == bestMatchPair.second)){
+                            currPair = bestMatchPair
+                            var firstValue = line.substring(posOfSpaces[i]+1,posOfSpaces[j])
+                            var secondValue = line.substring(posOfSpaces[k]+1)
+                            firstValue = Utils.myTrim(firstValue)
+                            secondValue = Utils.myTrim(secondValue)
+                            currAns = Pair(firstValue, secondValue)
                         }
                     }
                 }
             }
         }
-        if(ca.first == "" && ca.second == ""){
-            var po = 0.0
-            var wd = ""
-            for(i in 0..n-1){
-                var a = line.substring(0,v[i])
-                a = myTrim(a)
-                val op = LCS(a,pair.first)
-                if(op > 0.75 && po < op)
+        if(currAns.first == "" && currAns.second == ""){
+            // checking for single key value pair in a line
+            var bestMatchPercent = 0.0
+            var value = ""
+            for(iterate in 0..n-1){
+                var key = line.substring(0,posOfSpaces[iterate])
+                key = Utils.myTrim(key)
+                val currMatchPercent = Utils.LCS(key,pair.first)
+                if(currMatchPercent > 0.75 && bestMatchPercent < currMatchPercent)
                 {
-                    po = op
-                    wd = line.substring(v[i]+1)
-                    wd = myTrim(wd)
+                    bestMatchPercent = currMatchPercent
+                    value = line.substring(posOfSpaces[iterate]+1)
+                    value = Utils.myTrim(value)
                 }
             }
-            return Pair(wd,"")
+            return Pair(value,"")
         }
-        return ca
+        return currAns
     }
 
     private fun processOutput(pair:Pair<String,String>, out:Pair<String,String>){
@@ -128,6 +94,9 @@ class Reliance(stoL: HashMap<String,Int>) {
             "Make / Model & Variant"->{
                 hashmap["Vehicle Model"] = out.first
             }
+            "Engine No./Chassis No." ->{
+                hashmap["Engine No / Chassis No"] = out.first
+            }
             else->{
                 Log.e("Error: ","Cannot interpret the key")
             }
@@ -144,17 +113,17 @@ class Reliance(stoL: HashMap<String,Int>) {
 
     fun lineMatching(){
         for(pairs in keyWords){
-            var cp = Pair("","")
+            var bestPair = Pair("","")
             for(keys in stringToLine.keys){
-                var op:Pair<String,String> = detectPair(pairs,keys)
-                if(op.first != "" || op.second != ""){
-                    cp = op
+                val currPair = detectPair(pairs,keys)
+                if(currPair.first != "" || currPair.second != ""){
+                    bestPair = currPair
                     break
                 }
             }
-            if(cp.first == "" && cp.second == "")
+            if(bestPair.first == "" && bestPair.second == "")
                 continue
-            processOutput(pairs,cp)
+            processOutput(pairs,bestPair)
         }
     }
 
