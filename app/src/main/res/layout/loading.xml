@@ -3,18 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <variable name="title" type="java.lang.String" />
-        <variable name="subTitle" type="java.lang.String" />
+
+        <variable
+            name="title"
+            type="java.lang.String" />
+
+        <variable
+            name="subTitle"
+            type="java.lang.String" />
     </data>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/curve_dialog_shape"
-        android:paddingTop="16dp"
-        android:paddingBottom="32dp"
+        android:orientation="vertical"
         android:paddingHorizontal="20dp"
-        android:orientation="vertical">
+        android:paddingTop="16dp"
+        android:paddingBottom="32dp">
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/indefinite_loader"
@@ -22,27 +28,27 @@
             android:layout_height="72dp"
             android:layout_gravity="center_horizontal"
             app:lottie_autoPlay="true"
-            app:lottie_renderMode="software"
             app:lottie_loop="true"
-            app:lottie_rawRes="@raw/confirmation_main_loader" />
+            app:lottie_rawRes="@raw/confirmation_main_loader"
+            app:lottie_renderMode="software" />
 
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:textColor="@color/black"
+            android:layout_marginTop="16dp"
             android:text="Loading Image"
-            android:layout_marginTop="16dp"/>
+            android:textColor="@color/black" />
 
         <TextView
             android:id="@+id/tv_subTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:textColor="@color/black"
+            android:layout_marginTop="16dp"
             android:text="Extracting Your Info..."
-            android:layout_marginTop="16dp"/>
+            android:textColor="@color/black" />
 
     </LinearLayout>
 </layout>

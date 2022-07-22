@@ -1,39 +1,23 @@
 package com.example.ocrproject
 
 
-
-
-
-
-
-
-import android.app.Activity
-import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.os.*
-import android.provider.MediaStore
+import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
 import com.example.ocrproject.databinding.FragmentCameraBinding
 import java.io.File
-import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.jar.Manifest
-import kotlin.concurrent.thread
 
 
 class CameraFragment : Fragment() {
@@ -49,11 +33,12 @@ class CameraFragment : Fragment() {
         super.onAttach(context)
         safeContext = context
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(inflater,R.layout.fragment_camera,container,false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_camera, container, false)
         docType = arguments?.getString("docType") as String
         return binding.root
     }
@@ -61,8 +46,8 @@ class CameraFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this).get(CameraViewModel::class.java)
-        if(onCheckCamPermission()){
-            Toast.makeText(activity,"Camera Perission Required",Toast.LENGTH_SHORT).show()
+        if (onCheckCamPermission()) {
+            Toast.makeText(activity, "Camera Perission Required", Toast.LENGTH_SHORT).show()
             fragmentManager?.popBackStack()
         }
 
@@ -73,11 +58,14 @@ class CameraFragment : Fragment() {
     }
 
     private fun onCheckCamPermission(): Boolean {
-    return ContextCompat.checkSelfPermission(safeContext, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED
+        return ContextCompat.checkSelfPermission(
+            safeContext,
+            android.Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_DENIED
     }
 
 
-    private var currentPhotoPath:String = ""
+    private var currentPhotoPath: String = ""
     private fun createImageFile(): File {
         // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
@@ -92,12 +80,13 @@ class CameraFragment : Fragment() {
             currentPhotoPath = absolutePath
         }
     }
+
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
         // Create time stamped name and MediaStore entry.
-        val name:File = createImageFile()
-         //Create output options object which contains file + metadata
+        val name: File = createImageFile()
+        //Create output options object which contains file + metadata
         val outputOptions = ImageCapture.OutputFileOptions
             .Builder(name)
             .build()
@@ -110,17 +99,15 @@ class CameraFragment : Fragment() {
             ContextCompat.getMainExecutor(safeContext),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
-                    Log.e("CameraXApp", "Photo capture failed: ${exc.message}", exc)
+
                 }
 
-                override fun onImageSaved(output: ImageCapture.OutputFileResults){
-                    val msg = "Photo capture succeeded: ${output.savedUri}"
-                    Toast.makeText(activity, msg, Toast.LENGTH_LONG).show()
+                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     // adding Image URI as Bundle
-                    val imageFrag:Fragment = ImageFragment.newInstance()
+                    val imageFrag: Fragment = ImageFragment.newInstance()
                     val bundle = Bundle()
-                    bundle.putString("imageUri",output.savedUri.toString())
-                    bundle.putString("docType",docType)
+                    bundle.putString("imageUri", output.savedUri.toString())
+                    bundle.putString("docType", docType)
                     imageFrag.setArguments(bundle)
                     activity?.let {
                         it.supportFragmentManager.beginTransaction()
@@ -128,8 +115,6 @@ class CameraFragment : Fragment() {
                             .addToBackStack("camFrag")
                             .commit()
                     }
-//                    setFragmentResult("requestKey", bundleOf("bundleKey" to output.savedUri.toString()))
-//                    navigateToImage()
                 }
             }
         )
@@ -157,24 +142,25 @@ class CameraFragment : Fragment() {
 
                 // Bind use cases to camera
                 val camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview,imageCapture)
+                    this, cameraSelector, preview, imageCapture
+                )
 
                 // Adding auto focus on CameraX
 
                 binding.viewFinder.afterMeasured {
                     binding.viewFinder.setOnTouchListener { _, event ->
-                        return@setOnTouchListener autoFocus(event,camera)
+                        return@setOnTouchListener autoFocus(event, camera)
                     }
                 }
 
-            } catch(exc: Exception) {
+            } catch (exc: Exception) {
                 Log.e("CameraXApp", "Use case binding failed", exc)
             }
 
         }, ContextCompat.getMainExecutor(safeContext))
     }
 
-    private fun autoFocus(event: MotionEvent, camera: Camera):Boolean{
+    private fun autoFocus(event: MotionEvent, camera: Camera): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 return true
@@ -207,7 +193,8 @@ class CameraFragment : Fragment() {
         if (measuredWidth > 0 && measuredHeight > 0) {
             block()
         } else {
-            viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            viewTreeObserver.addOnGlobalLayoutListener(object :
+                ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     if (measuredWidth > 0 && measuredHeight > 0) {
                         viewTreeObserver.removeOnGlobalLayoutListener(this)

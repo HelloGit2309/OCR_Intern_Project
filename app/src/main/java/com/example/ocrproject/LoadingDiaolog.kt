@@ -1,4 +1,3 @@
-
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
@@ -9,10 +8,11 @@ import com.example.ocrproject.R
 
 class dialog  // constructor of dialog class
 // with parameter activity
-internal constructor(// 2 objects activity and dialog
+internal constructor(
     private val activity: Activity?
 ) {
     private var dialog: AlertDialog? = null
+
     @SuppressLint("InflateParams")
     fun startLoadingdialog() {
         activity ?: return
@@ -29,6 +29,7 @@ internal constructor(// 2 objects activity and dialog
             it.requestFeature(Window.FEATURE_NO_TITLE)
         }
         dialog?.show()
+
     }
 
     // dismiss method

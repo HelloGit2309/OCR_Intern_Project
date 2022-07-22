@@ -31,11 +31,11 @@ class TitleFragment : Fragment() {
     companion object {
         fun newInstance() = TitleFragment()
     }
+
     private lateinit var binding: FragmentTitleBinding
     private lateinit var viewModel: TitleViewModel
     private val PICKFILE_REQUEST_CODE = 3
-    private lateinit var safeContext:Context
-    private lateinit var docType:String
+    private lateinit var safeContext: Context
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -48,7 +48,7 @@ class TitleFragment : Fragment() {
     ): View? {
 
 //        docType = ""
-         binding = DataBindingUtil.inflate(
+        binding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_title,
             container,
@@ -61,28 +61,25 @@ class TitleFragment : Fragment() {
         val arrayAdapter = ArrayAdapter(safeContext, R.layout.dropdown_item, doc_type)
         // set adapter to the autocomplete tv to the arrayAdapter
         binding.autoCompleteTextView.setAdapter(arrayAdapter)
-        binding.autoCompleteTextView.setOnClickListener{
+        binding.autoCompleteTextView.setOnClickListener {
             binding.autoCompleteTextView.showDropdown(arrayAdapter)
         }
 
         viewModel = ViewModelProvider(this).get(TitleViewModel::class.java)
         binding.titleViewModel = viewModel
 
-        viewModel.scan.observe(viewLifecycleOwner, Observer{myScan ->
-            if(myScan)
+        viewModel.scan.observe(viewLifecycleOwner, Observer { myScan ->
+            if (myScan)
                 changeToCamFrag()
         })
 
-        viewModel.upload.observe(viewLifecycleOwner,Observer{myUpload ->
-            if(myUpload)
-            {
+        viewModel.upload.observe(viewLifecycleOwner, Observer { myUpload ->
+            if (myUpload) {
                 val docType = binding.autoCompleteTextView.text.toString()
-                if(docType == "Select Document Type")
-                {
-                    Toast.makeText(activity,"Select Document Type",Toast.LENGTH_SHORT).show()
+                if (docType == "Select Document Type") {
+                    Toast.makeText(activity, "Select Document Type", Toast.LENGTH_SHORT).show()
                     viewModel.onAfterUploadPress()
-                }
-                else{
+                } else {
                     viewModel.onAfterUploadPress()
                     onSelectImage()
                 }
@@ -93,18 +90,16 @@ class TitleFragment : Fragment() {
         return binding.root
     }
 
-    private fun changeToCamFrag(){
+    private fun changeToCamFrag() {
         val docType = binding.autoCompleteTextView.text.toString()
-        if(docType == "Select Document Type")
-        {
+        if (docType == "Select Document Type") {
             viewModel.onAfterScanPress()
-            Toast.makeText(activity,"Select Document Type",Toast.LENGTH_SHORT).show()
-        }
-        else{
+            Toast.makeText(activity, "Select Document Type", Toast.LENGTH_SHORT).show()
+        } else {
             viewModel.onAfterScanPress()
-            val cameraFragment:Fragment = CameraFragment.newInstance()
+            val cameraFragment: Fragment = CameraFragment.newInstance()
             val bundle = Bundle()
-            bundle.putString("docType",docType)
+            bundle.putString("docType", docType)
             cameraFragment.arguments = bundle
             activity?.let {
                 it.supportFragmentManager.beginTransaction()
@@ -117,26 +112,31 @@ class TitleFragment : Fragment() {
 
 
     fun AutoCompleteTextView.showDropdown(adapter: ArrayAdapter<String>?) {
-        if(!TextUtils.isEmpty(this.text.toString())){
+        if (!TextUtils.isEmpty(this.text.toString())) {
             adapter?.filter?.filter(null)
         }
     }
 
-    private fun onCheckStoragePermission():Boolean{
-        var a:Boolean = ContextCompat.checkSelfPermission(safeContext, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-        var b:Boolean = ContextCompat.checkSelfPermission(safeContext, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-        return a&&b
+    private fun onCheckStoragePermission(): Boolean {
+        val writePermission: Boolean = ContextCompat.checkSelfPermission(
+            safeContext,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+        val readPermission: Boolean = ContextCompat.checkSelfPermission(
+            safeContext,
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+        return writePermission && readPermission
     }
 
-    private fun onSelectImage(){
-        if(!onCheckStoragePermission())
-        {
-            Toast.makeText(activity,"Storage Permission Required",Toast.LENGTH_SHORT)
+    private fun onSelectImage() {
+        if (!onCheckStoragePermission()) {
+            Toast.makeText(activity, "Storage Permission Required", Toast.LENGTH_SHORT)
 //            return
         }
-        val intent:Intent = Intent(Intent.ACTION_GET_CONTENT)
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.setType("*/*");
-        startActivityForResult(intent,PICKFILE_REQUEST_CODE)
+        startActivityForResult(intent, PICKFILE_REQUEST_CODE)
     }
 
     private fun getMimeType(context: Context, uri: Uri?): String? {
@@ -164,19 +164,17 @@ class TitleFragment : Fragment() {
         if (requestCode === PICKFILE_REQUEST_CODE && resultCode === Activity.RESULT_OK) {
             data ?: return
 
-            val fileExt = getMimeType(safeContext,data.data) as String
-//            val fileExt = uri.substring(uri.lastIndexOf("."))
-            Log.i("HElloo",fileExt)
-            if(fileExt != "jpg" && fileExt != "jpeg" && fileExt != "png" && fileExt != "pdf")
-            {
-                Toast.makeText(activity,"File Not Image",Toast.LENGTH_SHORT).show()
+            val fileExt = getMimeType(safeContext, data.data) as String
+            Log.i("HElloo", fileExt)
+            if (fileExt != "jpg" && fileExt != "jpeg" && fileExt != "png") {
+                Toast.makeText(activity, "File Not Image", Toast.LENGTH_SHORT).show()
                 fragmentManager?.popBackStack()
                 return
             }
-            val imageFrag:Fragment = ImageFragment.newInstance()
+            val imageFrag: Fragment = ImageFragment.newInstance()
             val bundle = Bundle()
-            bundle.putString("imageUri",data.data.toString())
-            bundle.putString("docType",binding.autoCompleteTextView.text.toString())
+            bundle.putString("imageUri", data.data.toString())
+            bundle.putString("docType", binding.autoCompleteTextView.text.toString())
             imageFrag.setArguments(bundle)
             activity?.let {
                 it.supportFragmentManager.beginTransaction()

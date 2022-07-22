@@ -17,7 +17,8 @@ class MainActivity : AppCompatActivity() {
 
         if (!allPermissionsGranted()) {
             ActivityCompat.requestPermissions(
-                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+            )
         }
         if (!OpenCVLoader.initDebug())
             Log.e("OpenCV", "Unable to load OpenCV!");
@@ -36,16 +37,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(
-            baseContext, it) == PackageManager.PERMISSION_GRANTED
+            baseContext, it
+        ) == PackageManager.PERMISSION_GRANTED
     }
+
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS =
-            mutableListOf (
+            mutableListOf(
                 Manifest.permission.CAMERA,
                 Manifest.permission.READ_EXTERNAL_STORAGE
-            ).apply{
+            ).apply {
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P)
                     add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }.toTypedArray()
